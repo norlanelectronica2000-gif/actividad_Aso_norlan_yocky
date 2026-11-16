@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistemas Operativos | Guía Técnica, Problemas y Soluciones</title>
+    <style>
+        /* =========================================
+           VARIABLES Y RESETEO GLOBAL
+           ========================================= */
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #263349;
+            --accent-primary: #38bdf8;
+            --accent-secondary: #818cf8;
+            --accent-success: #34d399;
+            --accent-warning: #fbbf24;
+            --accent-danger: #f87171;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* =========================================
+           NAVEGACIÓN Y MENÚ DINÁMICO (SOLO CSS)
+           ========================================= */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Checkbox oculto para menú móvil */
+        #menu-toggle {
+            display: none;
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 10px 18px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+        }
+
+        /* Subrayado animado dinámico */
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--accent-primary);
+            transition: all var(--transition-speed) ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover {
+            color: var(--accent-primary);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .nav-link:hover::after {
+            width: 70%;
+        }
+
+        /* Submenú desplegable dinámico (Dropdown) */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 240px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 0;
+            list-style: none;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(15px);
+            transition: all var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-item:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(5px);
+        }
+
+        .dropdown-menu li a {
+            display: block;
+            padding: 10px 20px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-menu li a:hover {
+            color: var(--text-main);
+            background: var(--bg-card-hover);
+            border-left-color: var(--accent-primary);
+            padding-left: 25px;
+        }
+
+        /* =========================================
+           HERO SECTION
+           ========================================= */
+        .hero {
+            padding: 90px 20px;
+            text-align: center;
+            background: radial-gradient(circle at top center, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: var(--accent-primary);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.15;
+        }
+
+        .hero p {
+            max-width: 720px;
+            margin: 0 auto 35px;
+            color: var(--text-muted);
+            font-size: 1.15rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #0f172a;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.35);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            background: var(--bg-card);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-card-hover);
+        }
+
+        /* =========================================
+           CONTENEDOR Y SECCIONES GENERALES
+           ========================================= */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 55px;
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* =========================================
+           INFORMACIÓN BÁSICA (CARDS GRID)
+           ========================================= */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 30px;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            background: var(--bg-card-hover);
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.96rem;
+        }
+
+        /* Comparativa rápida de SO */
+        .os-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pill {
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--accent-primary);
+        }
+
+        /* =========================================
+           PROBLEMAS Y SOLUCIONES (ACORDEÓN PURO CSS)
+           ========================================= */
+        .troubleshooting-section {
+            background: rgba(30, 41, 59, 0.35);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Usando etiqueta <details> nativa estilizada dinámicamente */
+        details.issue-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all var(--transition-speed) ease;
+        }
+
+        details.issue-item[open] {
+            border-color: var(--accent-primary);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        details.issue-item summary {
+            padding: 22px 25px;
+            font-size: 1.12rem;
+            font-weight: 600;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        details.issue-item summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.issue-item summary:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .issue-title-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .tag-problem {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            background: rgba(248, 113, 113, 0.15);
+            color: var(--accent-danger);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+
+        .chevron {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            transition: transform var(--transition-speed) ease;
+        }
+
+        details.issue-item[open] .chevron {
+            transform: rotate(180deg);
+        }
+
+        .issue-content {
+            padding: 0 25px 25px 25px;
+            border-top: 1px solid rgba(51, 65, 85, 0.6);
+            padding-top: 20px;
+            color: var(--text-muted);
+            animation: fadeIn 0.35s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .solution-box {
+            margin-top: 15px;
+            background: rgba(15, 23, 42, 0.7);
+            border-left: 4px solid var(--accent-success);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .solution-box h4 {
+            color: var(--accent-success);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .solution-box ul {
+            padding-left: 20px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .solution-box li {
+            margin-bottom: 6px;
+        }
+
+        code {
+            background: #090d16;
+            color: var(--accent-warning);
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* =========================================
+           FOOTER DE CONTACTO
+           ========================================= */
+        footer {
+            background: #090d16;
+            border-top: 1px solid var(--border-color);
+            padding: 60px 20px 30px;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.2rem;
+            margin-bottom: 18px;
+            color: var(--text-main);
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-col h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        .footer-col p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .contact-list {
+            list-style: none;
+        }
+
+        .contact-list li {
+            margin-bottom: 12px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-list a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .contact-list a:hover {
+            text-decoration: underline;
+            color: var(--text-main);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .social-btn {
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .social-btn:hover {
+            background: var(--accent-primary);
+            color: #0f172a;
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 25px;
+            border-top: 1px solid rgba(51, 65, 85, 0.5);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        /* =========================================
+           RESPONSIVE DESIGN (MÓVILES Y TABLETS)
+           ========================================= */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-menu {
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: var(--bg-card);
+                flex-direction: column;
+                align-items: stretch;
+                padding: 0;
+                max-height: 0;
+                overflow: hidden;
+                border-bottom: 1px solid var(--border-color);
+                transition: max-height 0.4s ease;
+            }
+
+            /* Abre menú móvil con checkbox hack */
+            #menu-toggle:checked ~ .nav-menu {
+                max-height: 600px;
+                padding: 15px 0;
+            }
+
+            .dropdown-menu {
+                position: static;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                box-shadow: none;
+                border: none;
+                background: rgba(15, 23, 42, 0.5);
+                padding-left: 20px;
+                display: none;
+            }
+
+            .nav-item:hover .dropdown-menu {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================
+         HEADER Y MENÚ DINÁMICO DE OPCIONES
+         ========================================= -->
+    <header>
+        <div class="nav-container">
+            <a href="#inicio" class="logo">
+                <span>OS</span>Portal Técnico
+            </a>
+
+            <!-- Controlador responsivo sin JS -->
+            <input type="checkbox" id="menu-toggle">
+            <label for="menu-toggle" class="hamburger">&#9776;</label>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#inicio" class="nav-link">Inicio</a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#informacion-basica" class="nav-link">Información Básica &#9662;</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#kernel">El Kernel (Núcleo)</a></li>
+                        <li><a href="#procesos">Gestión de Procesos</a></li>
+                        <li><a href="#memoria">Administración de Memoria</a></li>
+                        <li><a href="#archivos">Sistemas de Archivos</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#problemas-soluciones" class="nav-link">Problemas y Soluciones &#9662;</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#prob-bsod">Pantalla Azul / Kernel Panic</a></li>
+                        <li><a href="#prob-ram">Fugas de Memoria (RAM)</a></li>
+                        <li><a href="#prob-disco">Cuello de Botella en Disco</a></li>
+                        <li><a href="#prob-arranque">Fallos de Arranque (Boot)</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#contacto" class="nav-link">Contacto</a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- =========================================
+         SECCIÓN HERO
+         ========================================= -->
+    <section id="inicio" class="hero">
+        <span class="hero-badge">Arquitectura &amp; Soporte de Sistemas</span>
+        <h1>Todo sobre <span>Sistemas Operativos</span></h1>
+        <p>
+            Explora los fundamentos esenciales que conectan el hardware con el software, 
+            y diagnostica paso a paso los fallos críticos más frecuentes en entornos Windows, Linux y macOS.
+        </p>
+        <div class="hero-buttons">
+            <a href="#informacion-basica" class="btn btn-primary">Explorar Fundamentos</a>
+            <a href="#problemas-soluciones" class="btn btn-outline">Diagnóstico de Errores</a>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SECCIÓN: INFORMACIÓN BÁSICA
+         ========================================= -->
+    <section id="informacion-basica" class="container">
+        <div class="section-header">
+            <h2>Fundamentos de un Sistema Operativo</h2>
+            <p>
+                Un Sistema Operativo (SO) es el software principal que gestiona los recursos físicos de una computadora 
+                y provee servicios esenciales para la ejecución de aplicaciones.
+            </p>
+        </div>
+
+        <div class="grid-cards">
+            <!-- Tarjeta 1 -->
+            <article id="kernel" class="card">
+                <div class="card-icon">&#9881;</div>
+                <h3>1. El Kernel (Núcleo)</h3>
+                <p>
+                    Es el corazón del sistema operativo. Actúa como puente directo entre las aplicaciones y el hardware 
+                    (CPU, memoria y dispositivos de E/S) operando en modo privilegiado para garantizar estabilidad y seguridad.
+                </p>
+                <div class="os-pills">
+                    <span class="pill">Monolítico (Linux)</span>
+                    <span class="pill">Híbrido (Windows / XNU)</span>
+                </div>
+            </article>
+
+            <!-- Tarjeta 2 -->
+            <article id="procesos" class="card">
+                <div class="card-icon">&#9889;</div>
+                <h3>2. Gestión de Procesos</h3>
+                <p>
+                    El planificador (Scheduler) decide qué proceso utiliza el procesador y durante cuánto tiempo, 
+                    permitiendo la multitarea real mediante hilos (threads) y cambios de contexto ultrarrápidos.
+                </p>
+                <div class="os-pills">
+                    <span class="pill">Multitarea</span>
+                    <span class="pill">Concurrencia</span>
+                    <span class="pill">Hilos</span>
+                </div>
+            </article>
+
+            <!-- Tarjeta 3 -->
+            <article id="memoria" class="card">
+                <div class="card-icon">&#9638;</div>
+                <h3>3. Administración de Memoria</h3>
+                <p>
+                    Asigna bloques de memoria RAM a cada programa en ejecución y aísla sus espacios para evitar 
+                    corrupción de datos. Cuando la RAM física se llena, utiliza memoria virtual (Paginación / Swap).
+                </p>
+                <div class="os-pills">
+                    <span class="pill">RAM Física</span>
+                    <span class="pill">Memoria Virtual</span>
+                    <span class="pill">Paginación</span>
+                </div>
+            </article>
+
+            <!-- Tarjeta 4 -->
+            <article id="archivos" class="card">
+                <div class="card-icon">&#128193;</div>
+                <h3>4. Sistemas de Archivos</h3>
+                <p>
+                    Estructura lógica que organiza cómo se almacenan, indexan y recuperan los datos en unidades 
+                    de almacenamiento (SSD/HDD), controlando permisos de lectura, escritura y cifrado.
+                </p>
+                <div class="os-pills">
+                    <span class="pill">NTFS</span>
+                    <span class="pill">ext4</span>
+                    <span class="pill">APFS</span>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SECCIÓN: PROBLEMAS Y SOLUCIONES
+         ========================================= -->
+    <section id="problemas-soluciones" class="troubleshooting-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Problemas Comunes y Soluciones Técnicas</h2>
+                <p>
+                    Haz clic sobre cada incidente crítico para desplegar el diagnóstico de causa raíz y los pasos de resolución.
+                </p>
+            </div>
+
+            <div class="accordion-container">
+                <!-- Problema 1 -->
+                <details id="prob-bsod" class="issue-item" open>
+                    <summary>
+                        <div class="issue-title-group">
+                            <span class="tag-problem">Crítico</span>
+                            <span>Pantalla Azul (BSOD) o Kernel Panic repentino</span>
+                        </div>
+                        <span class="chevron">&#9662;</span>
+                    </summary>
+                    <div class="issue-content">
+                        <p>
+                            <strong>Causa principal:</strong> Ocurre cuando el núcleo del sistema detecta un error irrecuperable, 
+                            generalmente provocado por controladores (drivers) corruptos, incompatibles o fallos físicos en módulos de RAM.
+                        </p>
+                        <div class="solution-box">
+                            <h4>Protocolo de Solución</h4>
+                            <ul>
+                                <li><strong>Windows:</strong> Inicia en <em>Modo Seguro</em>, revierte controladores recientes y ejecuta <code>sfc /scannow</code> junto con <code>DISM /Online /Cleanup-Image /RestoreHealth</code>.</li>
+                                <li><strong>Linux / macOS:</strong> Revisa los registros del último arranque con <code>journalctl -b -1 -p err</code> para identificar el módulo del kernel responsable.</li>
+                                <li><strong>Hardware:</strong> Ejecuta un diagnóstico de memoria (<em>MemTest86</em>) para descartar sectores dañados en la RAM.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Problema 2 -->
+                <details id="prob-ram" class="issue-item">
+                    <summary>
+                        <div class="issue-title-group">
+                            <span class="tag-problem">Rendimiento</span>
+                            <span>Consumo excesivo de RAM y lentitud extrema (Thrashing)</span>
+                        </div>
+                        <span class="chevron">&#9662;</span>
+                    </summary>
+                    <div class="issue-content">
+                        <p>
+                            <strong>Causa principal:</strong> Fugas de memoria (memory leaks) en procesos en segundo plano que provocan 
+                            que el sistema dependa excesivamente del archivo de paginación en disco (intercambio constante).
+                        </p>
+                        <div class="solution-box">
+                            <h4>Protocolo de Solución</h4>
+                            <ul>
+                                <li>Identifica el proceso que retiene memoria mediante el <em>Administrador de Tareas</em> o usando <code>htop</code> / <code>top</code> en terminal Unix.</li>
+                                <li>Deshabilita servicios y aplicaciones innecesarias en el arranque del sistema (<code>systemctl disable [servicio]</code> en Linux).</li>
+                                <li>Verifica que el archivo de intercambio (Swap / Pagefile) esté alojado en un SSD y no en un disco mecánico lento.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Problema 3 -->
+                <details id="prob-disco" class="issue-item">
+                    <summary>
+                        <div class="issue-title-group">
+                            <span class="tag-problem">Almacenamiento</span>
+                            <span>Uso de Disco al 100% y bloqueo de interfaz</span>
+                        </div>
+                        <span class="chevron">&#9662;</span>
+                    </summary>
+                    <div class="issue-content">
+                        <p>
+                            <strong>Causa principal:</strong> Operaciones intensivas de lectura/escritura simultáneas, indexación de búsqueda 
+                            descontrolada, actualizaciones pendientes o degradación física de sectores del almacenamiento.
+                        </p>
+                        <div class="solution-box">
+                            <h4>Protocolo de Solución</h4>
+                            <ul>
+                                <li>Comprueba el estado de salud S.M.A.R.T. de la unidad usando herramientas como <code>smartctl -a /dev/sda</code>.</li>
+                                <li>En Windows, verifica los procesos de <em>SysMain</em> y el servicio de <em>Windows Search</em>, y ejecuta <code>chkdsk /f /r</code> en el próximo reinicio.</li>
+                                <li>Asegúrate de mantener al menos un <strong>15% de espacio libre</strong> en SSD para permitir el correcto funcionamiento del algoritmo <em>TRIM</em>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Problema 4 -->
+                <details id="prob-arranque" class="issue-item">
+                    <summary>
+                        <div class="issue-title-group">
+                            <span class="tag-problem">Arranque</span>
+                            <span>Error "No Bootable Device" o fallo en GRUB / BCD</span>
+                        </div>
+                        <span class="chevron">&#9662;</span>
+                    </summary>
+                    <div class="issue-content">
+                        <p>
+                            <strong>Causa principal:</strong> Corrupción en el gestor de arranque (Bootloader), cambio accidental entre 
+                            modos UEFI y Legacy BIOS en la placa base, o pérdida de la partición EFI.
+                        </p>
+                        <div class="solution-box">
+                            <h4>Protocolo de Solución</h4>
+                            <ul>
+                                <li>Accede a la configuración UEFI/BIOS y confirma que el orden de arranque apunte al disco principal y que el modo coincida con la instalación original (UEFI).</li>
+                                <li><strong>Reparar Windows (BCD):</strong> Arranca desde un medio de instalación, abre consola y ejecuta <code>bootrec /fixmbr</code> y <code>bootrec /rebuildbcd</code>.</li>
+                                <li><strong>Reparar Linux (GRUB):</strong> Inicia desde un Live USB, monta la partición raíz con <code>chroot</code> y reinstala el cargador con <code>grub-install</code> y <code>update-grub</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         FOOTER CON INFORMACIÓN DE CONTACTO
+         ========================================= -->
+    <footer id="contacto">
+        <div class="footer-grid">
+            <!-- Columna 1: Sobre el sitio -->
+            <div class="footer-col">
+                <h3>OS Portal Técnico</h3>
+                <p>
+                    Plataforma educativa y de soporte especializada en arquitectura de sistemas operativos, 
+                    administración de servidores y resolución de incidentes técnicos.
+                </p>
+                <div class="social-links">
+                    <a href="https://github.com" target="_blank" rel="noopener" class="social-btn">GitHub</a>
+                    <a href="https://linkedin.com" target="_blank" rel="noopener" class="social-btn">LinkedIn</a>
+                    <a href="https://x.com" target="_blank" rel="noopener" class="social-btn">X / Twitter</a>
+                </div>
+            </div>
+
+            <!-- Columna 2: Accesos Rápidos -->
+            <div class="footer-col">
+                <h3>Navegación</h3>
+                <ul class="contact-list">
+                    <li>&#8250; <a href="#inicio">Inicio</a></li>
+                    <li>&#8250; <a href="#informacion-basica">Arquitectura del SO</a></li>
+                    <li>&#8250; <a href="#problemas-soluciones">Guía de Soluciones</a></li>
+                    <li>&#8250; <a href="#kernel">Documentación del Kernel</a></li>
+                </ul>
+            </div>
+
+            <!-- Columna 3: Información de Contacto (Personalizable) -->
+            <div class="footer-col">
+                <h3>Información de Contacto</h3>
+                <p>¿Necesitas asesoría técnica o tienes alguna consulta sobre sistemas? Contáctame:</p>
+                <ul class="contact-list">
+                    <li>&#128100; <strong>Autor:</strong> Tu Nombre / Especialista TI</li>
+                    <li>&#9993; <strong>Correo:</strong> <a href="mailto:contacto@tudominio.com">contacto@tudominio.com</a></li>
+                    <li>&#128222; <strong>Teléfono:</strong> <a href="tel:+520000000000">+52 (000) 000-0000</a></li>
+                    <li>&#128205; <strong>Ubicación:</strong> Ciudad, País</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            &copy; 2026 OS Portal Técnico &mdash; Desarrollado con HTML5 y CSS3 puro. Todos los derechos reservados.
+        </div>
+    </footer>
+
+</body>
+</html>
